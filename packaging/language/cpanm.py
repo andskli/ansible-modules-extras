@@ -89,6 +89,7 @@ EXAMPLES = '''
 - cpanm: name=Dancer mirror=http://cpan.cpantesters.org/
 '''
 
+
 def _is_package_installed(module, name, locallib, cpanm):
     cmd = ""
     if locallib:
@@ -96,13 +97,15 @@ def _is_package_installed(module, name, locallib, cpanm):
     cmd = "%s perl -M%s -e '1'" % (cmd, name)
     res, stdout, stderr = module.run_command(cmd, check_rc=False)
     if res == 0:
-       return True
+        return True
     else:
-       return False
+        return False
+
 
 def _build_cmd_line(name, from_path, notest, locallib, mirror, mirror_only,
                     installdeps, cpanm):
-    # this code should use "%s" like everything else and just return early but not fixing all of it now.
+    # this code should use "%s" like everything else and just return early but
+    # not fixing all of it now.
     # don't copy stuff like this
     if from_path:
         cmd = "{cpanm} {path}".format(cpanm=cpanm, path=from_path)
@@ -143,23 +146,23 @@ def main():
         required_one_of=[['name', 'from_path']],
     )
 
-    cpanm       = module.get_bin_path('cpanm', True)
-    name        = module.params['name']
-    from_path   = module.params['from_path']
-    notest      = module.boolean(module.params.get('notest', False))
-    locallib    = module.params['locallib']
-    mirror      = module.params['mirror']
+    cpanm = module.get_bin_path('cpanm', True)
+    name = module.params['name']
+    from_path = module.params['from_path']
+    notest = module.boolean(module.params.get('notest', False))
+    locallib = module.params['locallib']
+    mirror = module.params['mirror']
     mirror_only = module.params['mirror_only']
     installdeps = module.params['installdeps']
 
-    changed   = False
+    changed = False
 
     installed = _is_package_installed(module, name, locallib, cpanm)
 
     if not installed:
         out_cpanm = err_cpanm = ''
-        cmd       = _build_cmd_line(name, from_path, notest, locallib, mirror,
-                                    mirror_only, installdeps, cpanm)
+        cmd = _build_cmd_line(name, from_path, notest, locallib, mirror,
+                              mirror_only, installdeps, cpanm)
 
         rc_cpanm, out_cpanm, err_cpanm = module.run_command(cmd, check_rc=False)
 
