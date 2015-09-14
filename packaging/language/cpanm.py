@@ -48,6 +48,11 @@ options:
       - Specify the install base to install modules
     required: false
     default: false
+  selfcontained:
+    description:
+      - Set the --self-contained option for install.
+    required: false
+    default: false
   mirror:
     description:
       - Specifies the base URL for the CPAN mirror to use
@@ -102,8 +107,8 @@ def _is_package_installed(module, name, locallib, cpanm):
         return False
 
 
-def _build_cmd_line(name, from_path, notest, locallib, mirror, mirror_only,
-                    installdeps, cpanm):
+def _build_cmd_line(name, from_path, notest, locallib, selfcontained, mirror,
+                    mirror_only, installdeps, cpanm):
     # this code should use "%s" like everything else and just return early but
     # not fixing all of it now.
     # don't copy stuff like this
@@ -117,6 +122,9 @@ def _build_cmd_line(name, from_path, notest, locallib, mirror, mirror_only,
 
     if locallib is not None:
         cmd = "{cmd} -l {locallib}".format(cmd=cmd, locallib=locallib)
+
+    if selfcontained is True:
+        cmd = "{cmd} --self-contained".format(cmd=cmd)
 
     if mirror is not None:
         cmd = "{cmd} --mirror {mirror}".format(cmd=cmd, mirror=mirror)
@@ -136,6 +144,7 @@ def main():
         from_path=dict(default=None, required=False),
         notest=dict(default=False, type='bool'),
         locallib=dict(default=None, required=False),
+        selfcontained=dict(default=False, required=False),
         mirror=dict(default=None, required=False),
         mirror_only=dict(default=False, type='bool'),
         installdeps=dict(default=False, type='bool'),
@@ -151,6 +160,7 @@ def main():
     from_path = module.params['from_path']
     notest = module.boolean(module.params.get('notest', False))
     locallib = module.params['locallib']
+    selfcontained = module.params['selfcontained']
     mirror = module.params['mirror']
     mirror_only = module.params['mirror_only']
     installdeps = module.params['installdeps']
@@ -161,8 +171,8 @@ def main():
 
     if not installed:
         out_cpanm = err_cpanm = ''
-        cmd = _build_cmd_line(name, from_path, notest, locallib, mirror,
-                              mirror_only, installdeps, cpanm)
+        cmd = _build_cmd_line(name, from_path, notest, locallib, selfcontained,
+                              mirror, mirror_only, installdeps, cpanm)
 
         rc_cpanm, out_cpanm, err_cpanm = module.run_command(cmd, check_rc=False)
 
